@@ -76,3 +76,15 @@ func TestDispatcher_UnSubscribe(t *testing.T) {
 	d.UnSubscribe("end", onEntrance)
 	d.TriggerEvent("start",e)
 }
+
+func TestDispatcher_MultiSubscribe(t *testing.T) {
+	d := NewDispatcher()
+	d.Subscribe("start", test)
+	d.MultiSubscribe("end", onEntrance,sample)
+	var e = &SimpleEvent{}
+	e.SetData(map[string]interface{}{
+		"easy" : 12,
+		"dispatcher":d,
+	})
+	d.TriggerEvent("start",e)
+}

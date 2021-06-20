@@ -67,6 +67,19 @@ func (d *Dispatcher) Subscribe(name string, callback func(Event)) error{
 	}
 	return nil
 }
+
+func (d *Dispatcher) MultiSubscribe(name string, callbacks ...func(Event)) error{
+	if !d.ExistEvent(name){
+		d.subscribers[name] = make(map[string]*Subscriber)
+	}
+	for _, callback := range callbacks {
+		err := d.Subscribe(name,callback)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func (d *Dispatcher) AlreadySubscribed(name string, funcname string) bool{
 	if _, ok := d.subscribers[name]; ok {
 		if _, ok2 := d.subscribers[name][funcname]; ok2 {
