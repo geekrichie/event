@@ -2,6 +2,8 @@ package event
 
 import (
 	"fmt"
+	"reflect"
+	"runtime"
 	"testing"
 )
 
@@ -50,5 +52,27 @@ func TestDispatcher_Subscribe1(t *testing.T) {
 		"easy" : 12,
 		"dispatcher":d,
 	})
+	d.TriggerEvent("start",e)
+}
+
+func TestFunc(t *testing.T) {
+	v := reflect.ValueOf(test)
+	if v.Kind() == reflect.Func {
+		name := runtime.FuncForPC(v.Pointer()).Name()
+		fmt.Println("Name of function : " + name)
+	}
+}
+
+func TestDispatcher_UnSubscribe(t *testing.T) {
+	d := NewDispatcher()
+	d.Subscribe("start", test)
+	d.Subscribe("end", onEntrance)
+	d.Subscribe("end",sample)
+	var e = &SimpleEvent{}
+	e.SetData(map[string]interface{}{
+		"easy" : 12,
+		"dispatcher":d,
+	})
+	d.UnSubscribe("end", onEntrance)
 	d.TriggerEvent("start",e)
 }
