@@ -1,36 +1,31 @@
 package event
 
-import (
-	"errors"
-	"reflect"
-)
 
-//type Event struct{
-//	name string
-//	callback func()
-//}
 type Subscriber struct{
-	callback func([]interface{})
+	callback func(Event)
 	arguments []interface{}
 }
 
-func NewSubscriber(callback func([]interface{}), arguments ...interface{}) *Subscriber{
+type Event struct{
+	data interface{}
+}
+
+func (e *Event) SetData(data interface{}) {
+	e.data = data
+}
+
+func (e *Event) GetData() interface{}{
+	return e.data
+}
+
+func NewSubscriber(callback func(Event)) *Subscriber{
 	return &Subscriber{
 		callback: callback,
-		arguments: arguments,
 	}
 }
 
-func (s *Subscriber) call() ([]reflect.Value, error){
-	f := reflect.ValueOf(s.callback)
-	if len(s.arguments) != f.Type().NumIn() {
-		return nil, errors.New("the number of input params not match!")
-	}
-	in := make([]reflect.Value, len(s.arguments))
-	for k, v := range s.arguments {
-		in[k] = reflect.ValueOf(v)
-	}
-	return f.Call(in), nil
+func (s *Subscriber) call(event Event){
+	s.callback(event)
 }
 
 
@@ -39,30 +34,30 @@ type Dispatcher struct {
 	subscribers map[string][]*Subscriber
 }
 
-func New(name string) *Dispatcher{
+func NewDispatcher() *Dispatcher{
 	return  &Dispatcher{
 		subscribers: make(map[string][]*Subscriber),
 	}
 }
 
 
-func (d *Dispatcher) existEvent(name string) bool{
+func (d *Dispatcher) ExistEvent(name string) bool{
 	_,ok := d.subscribers[name]
 	return ok
 }
 
-func (d *Dispatcher) Subscribe(name string, callback func([]interface{}), auguments []interface{}) {
-	if !d.existEvent(name){
+func (d *Dispatcher) Subscribe(name string, callback func(Event)) {
+	if !d.ExistEvent(name){
 		d.subscribers[name] = make([]*Subscriber,0)
 	}
-	d.subscribers[name]  =  append(d.subscribers[name], NewSubscriber(callback, auguments...))
+	d.subscribers[name]  =  append(d.subscribers[name], NewSubscriber(callback))
 }
 
-func (d *Dispatcher) TriggerEvent(name string) {
-	if !d.existEvent(name) {
+func (d *Dispatcher) TriggerEvent(name string, event Event) {
+	if !d.ExistEvent(name) {
 		panic("event not exist")
 	}
 	for _,subscribers := range d.subscribers[name] {
-		subscribers.call()
+		subscribers.call(event)
 	}
 }
