@@ -6,15 +6,20 @@ type Subscriber struct{
 	arguments []interface{}
 }
 
-type Event struct{
+type Event interface{
+	SetData(data interface{})
+	GetData() interface{}
+}
+
+type SimpleEvent struct{
 	data interface{}
 }
 
-func (e *Event) SetData(data interface{}) {
+func (e *SimpleEvent) SetData(data interface{}) {
 	e.data = data
 }
 
-func (e *Event) GetData() interface{}{
+func (e *SimpleEvent) GetData() interface{}{
 	return e.data
 }
 

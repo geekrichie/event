@@ -13,24 +13,28 @@ func test(event Event)  {
 		d.TriggerEvent("end", event)
 	}
 }
+func sample(event Event) {
+	fmt.Println(event.GetData())
+}
 
 func onEntrance(event Event){
 	fmt.Println("saving to the database", event.GetData())
 }
 
 func TestCall(t *testing.T) {
-	var e = Event{
-		data:12,
-	}
-	s := NewSubscriber(test)
+	var e = &SimpleEvent{}
+	e.SetData(map[string]interface{}{
+		"easy" : 12,
+	})
+	s := NewSubscriber(onEntrance)
 	s.call(e)
 }
 
 func TestDispatcher_Subscribe(t *testing.T) {
 	d := NewDispatcher()
-	d.Subscribe("start", test)
+	d.Subscribe("start", sample)
 	d.Subscribe("start", onEntrance)
-	var e = Event{}
+	var e = &SimpleEvent{}
 	e.SetData(map[string]interface{}{
 		"easy" : 12,
 	})
@@ -41,7 +45,7 @@ func TestDispatcher_Subscribe1(t *testing.T) {
 	d := NewDispatcher()
 	d.Subscribe("start", test)
 	d.Subscribe("end", onEntrance)
-	var e = Event{}
+	var e = &SimpleEvent{}
 	e.SetData(map[string]interface{}{
 		"easy" : 12,
 		"dispatcher":d,
